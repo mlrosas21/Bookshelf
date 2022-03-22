@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <title>Proyecto final</title>
+    <title>Bookshelf - tu biblioteca</title>
 </head>
 
 <body>
@@ -20,7 +20,7 @@
         <h3 class="mx-3"><small class="text-muted">Un lugar donde seguir tus lecturas es </small><u>mucho más fácil</u></h3>
     </header>
 
-    <div class="container-l border border-3 rounded mx-5 mt-4 p-2" id="divForm">
+    <div class="container-l border border-primary border-3 rounded mx-5 mt-4 p-2" id="divForm">
         <form id="idForm">
             <legend> Añadir un libro a tu colección </legend>
             <div class="form-group mb-2">
@@ -41,9 +41,10 @@
 
     </div>
 
-    <div class="d-flex justify-content-around">
-        <button class="btn btn-info m-3" id="btnMostrarColeccion">Mostrar colección</button>
+    <div class="d-flex justify-content-around">      
+        <button type="checkbox" class="btn btn-info m-3" id="btnMostrarColeccion">Mostrar colección</button>
         <button class="btn btn btn-danger m-3" id="btnEliminarColeccion">Eliminar colección</button>
+        
     </div>
     
     <div class="m-3" id="progressBar"></div>
@@ -52,7 +53,8 @@
     
     <div id="coleccionLibros" class="row row-cols-md-4 g-4 gap-3 mx-3 mb-3 justify-content-evenly">
     </div>
-
+ 
+    <script src="https://kit.fontawesome.com/8067a35bdd.js" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/luxon@2.3.1/build/global/luxon.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
