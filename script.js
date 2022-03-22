@@ -1,7 +1,8 @@
 const DateTime = luxon.DateTime
 
 class Libro{
-    constructor(img, titulo, autor, genero, paginas, update, estado, verMas) {
+    constructor(isbn13, img, titulo, autor, genero, paginas, update, estado, verMas) {
+        this.isbn13 = isbn13
         this.img = img
         this.titulo = titulo
         this.autor = autor
@@ -42,7 +43,8 @@ formulario.addEventListener('submit', (e) => {
             console.log("LIBRO YA EN COLECCIÓN")
             swal("LIBRO YA EN COLECCIÓN", "Agregue otro título por favor", "error");
         } else {
-            let libro = new Libro(imgLibro, dataLibro.title, dataLibro.authors, dataLibro.categories, dataLibro.pageCount, fechaActual, estadoLibro, dataLibro.infoLink)
+            let isbn13 = dataLibro.industryIdentifiers.find(e => e.type == "ISBN_13")['identifier']
+            let libro = new Libro(isbn13, imgLibro, dataLibro.title, dataLibro.authors, dataLibro.categories, dataLibro.pageCount, fechaActual, estadoLibro, dataLibro.infoLink)
             arrayLibros.push(libro)
             localStorage.setItem('libros', JSON.stringify(arrayLibros))  
             Toastify({
@@ -73,10 +75,11 @@ function showArray(array) {
                 <div class="text-center mb-2">
                     <img src="${libro.img}" onerror="this.src='img/notFound.png'"></img>
                 </div>
-                <h2 class="card-title"><u>${libro.titulo}</u></h5>
+                <h3 class="card-title"><u>${libro.titulo}</u></h5>
                 <h5 class="card-text">Autor: ${libro.autor}</h3>
                 <h5 class="card-text">Género: ${libro.genero}</h3>
-                <p><small>Cantidad de páginas: ${libro.paginas}</small></p>
+                <p><small>Cantidad de páginas: ${libro.paginas}<br>
+                ISBN13: ${libro.isbn13}</small></p>
             </div>
             <div class="mx-5 mb-2 text-center gap-3">
                 <a href="${libro.verMas}" target="_blank"><button class="btn btn-sm btn-info"> Ver Más </button></a>
