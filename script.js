@@ -66,10 +66,10 @@ function showArray(array) {
     array.forEach((libro, indice) => { 
         coleccionLibros.innerHTML += `
         <div class="card h-105 p-0 col-4" id="libro${indice}" style="width: 20rem">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between">
                 <span class="badge bg-${libro.estado == "leido" ? "success" : "secondary"}">${libro.estado.toUpperCase()}</span>
             </div>
-            <div class="card-body">
+            <div class="card-body" id="bodyLibro">
                 <div class="text-center mb-2">
                     <img src="${libro.img}" onerror="this.src='img/notFound.png'"></img>
                 </div>
@@ -89,11 +89,37 @@ function showArray(array) {
 
         if (libro.estado == "por leer") {
             document.getElementById(`libro${indice}`).style["border"] = "1.5px solid #ff0000"
+            let bodyLibro = document.getElementById("bodyLibro")
+            bodyLibro.innerHTML = `
+                ${bodyLibro.innerHTML}
+                <button class="btn btn-sm btn-success btnChangeStatus" id="btnChangeStatus${indice}"><i class="fa-solid fa-check"></i>\tCambiar a Leido </button>
+                `
+            let botonCambiarEstado = document.getElementsByClassName('btnChangeStatus')
+            for (let i=0; i<botonCambiarEstado.length; i++) {
+                botonCambiarEstado[i].addEventListener('click', (e) => {
+                    let indexLibro = e.target.id.replace('btnChangeStatus', '')
+                    swal({
+                        title: "¿Desea cambiar el estado de este libro?",
+                        text: "Este cambio no podrá ser deshecho",
+                        icon: "info",
+                        buttons: true,
+                        dangerMode: false,
+                    })
+                    .then((willDelete) => {
+                        if (willDelete) {
+                            arrayLibros[indexLibro].estado = 'leido'
+                            showArray(arrayLibros)
+                            localStorage.setItem('libros', JSON.stringify(arrayLibros))  
+                        }
+                    })    
+                })
+            }
         } else if (libro.estado == "leido") {
             document.getElementById(`libro${indice}`).style["border"] = "1.5px solid #008209"
         }
-    })
 
+    })
+    
     // ELIMINAR LIBRO DE COLECCIÓN (ind.)
     let botonesEliminar = document.getElementsByClassName('btnEliminar')
     for (let i=0; i<botonesEliminar.length; i++) {
@@ -105,7 +131,7 @@ function showArray(array) {
                 icon: "warning",
                 buttons: true,
                 dangerMode: true,
-              })
+            })
             .then((willDelete) => {
                 if (willDelete) {
                     swal("¡Libro eliminado!", {
@@ -118,7 +144,31 @@ function showArray(array) {
             })    
         })
     }
-
+    
+    /*
+    // COMPLETAR LECTURA
+    let botonCambiarEstado = document.getElementsByClassName('btnChangeStatus')
+    for (let i=0; i<botonCambiarEstado.length; i++) {
+        botonCambiarEstado[i].addEventListener('click', (e) => {
+            console.log(e.target)
+            let indexLibro = e.target.id.replace('btnRemoveCard', '')
+            console.log(e.target.parentNode)
+            swal({
+                title: "¿Desea Cambiar el estado de este libro?",
+                icon: "info",
+                buttons: true,
+                dangerMode: true,
+            })
+            .then((willDelete) => {
+                if (willDelete) {
+                    console.log(indexLibro)
+                    console.log(arrayLibros[indexLibro])
+                    console.log('CAMBIADO');
+                }
+            })    
+        })
+    }
+*/
     // PORCENTAJE LEIDOS
     let filtroLeidos = arrayLibros.filter(libro => libro.estado == "leido")
     let numeroLeidos = filtroLeidos.length
@@ -160,15 +210,9 @@ function showArray(array) {
         showArray(arrayLibros.sort(function(a,b) {
             if(a.estado < b.estado) {return 1;}
             if(a.estado > b.estado) {return -1;} 
-<<<<<<< HEAD
             return 0;
         })
-        showArray()
-=======
-            return 0
-        }))
->>>>>>> a7613b5f5c24d7f68d67b93ebde1a0b2fe4b504b
-    })
+    )})
 }
 
 // MOSTRAR COLECCIÓN
