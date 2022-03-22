@@ -146,7 +146,7 @@ botonColeccion.addEventListener ('click', () => {
         arrayLibros.sort(function(a,b) {
             if(a.estado < b.estado) {return 1;}
             if(a.estado > b.estado) {return -1;} 
-            return 0
+            return 0;
         })
         showArray()
     })
