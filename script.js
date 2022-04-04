@@ -91,7 +91,7 @@ function showArray(array) {
         </div>`
 
         if (libro.estado == "por leer") {
-            document.getElementById(`libro${indice}`).style["border"] = "1.5px solid #ff0000"
+            document.getElementById(`libro${indice}`).classList.add("pendingBook")
             let bodyLibro = document.getElementById("bodyLibro")
             bodyLibro.innerHTML = `
                 ${bodyLibro.innerHTML}
@@ -118,7 +118,7 @@ function showArray(array) {
                 })
             }
         } else if (libro.estado == "leido") {
-            document.getElementById(`libro${indice}`).style["border"] = "1.5px solid #008209"
+            document.getElementById(`libro${indice}`).classList.add("doneBook")
         }
 
     })
@@ -147,31 +147,7 @@ function showArray(array) {
             })    
         })
     }
-    
-    /*
-    // COMPLETAR LECTURA
-    let botonCambiarEstado = document.getElementsByClassName('btnChangeStatus')
-    for (let i=0; i<botonCambiarEstado.length; i++) {
-        botonCambiarEstado[i].addEventListener('click', (e) => {
-            console.log(e.target)
-            let indexLibro = e.target.id.replace('btnRemoveCard', '')
-            console.log(e.target.parentNode)
-            swal({
-                title: "¿Desea Cambiar el estado de este libro?",
-                icon: "info",
-                buttons: true,
-                dangerMode: true,
-            })
-            .then((willDelete) => {
-                if (willDelete) {
-                    console.log(indexLibro)
-                    console.log(arrayLibros[indexLibro])
-                    console.log('CAMBIADO');
-                }
-            })    
-        })
-    }
-*/
+
     // PORCENTAJE LEIDOS
     let filtroLeidos = arrayLibros.filter(libro => libro.estado == "leido")
     let numeroLeidos = filtroLeidos.length
@@ -196,26 +172,38 @@ function showArray(array) {
     // A a Z
     let botonFiltroAlfabetico = document.getElementById("filtroAlfabetico")
     
+    function filterByAlphabeticalOrder(array) {
+        let filteredArray = arrayLibros.sort(function(a,b) {
+            if(a.titulo < b.titulo) {return -1;}
+            if(a.titulo > b.titulo) {return 1;} 
+            return 0;
+        })
+        return filteredArray
+    }
+
     botonFiltroAlfabetico.addEventListener('click', () => {
         coleccionLibros.innerHTML = ' '
-        showArray(arrayLibros.sort(function(a, b){
-            if(a.titulo < b.titulo) { return -1; }
-            if(a.titulo > b.titulo) { return 1; }
-            return 0;
-        }))
+        let arrayFilteredByAlphabeticalOrder = filterByAlphabeticalOrder(arrayLibros) 
+        showArray(arrayFilteredByAlphabeticalOrder)
     })
     
     // ESTADO LECTURA
     let botonFiltroLectura = document.getElementById("filtroLectura")
     
+    function filterByStatus(array) {
+        let filteredArray = array.sort(function(a,b) {
+        if(a.estado < b.estado) {return 1;}
+        if(a.estado > b.estado) {return -1;} 
+        return 0;
+        })
+        return filteredArray
+    }
+
     botonFiltroLectura.addEventListener('click', () => {
         coleccionLibros.innerHTML = ' '
-        showArray(arrayLibros.sort(function(a,b) {
-            if(a.estado < b.estado) {return 1;}
-            if(a.estado > b.estado) {return -1;} 
-            return 0;
-        })
-    )})
+        let arrayFilteredByStatus = filterByStatus(arrayLibros)
+        showArray(arrayFilteredByStatus)
+    })
 }
 
 // MOSTRAR COLECCIÓN
