@@ -1,35 +1,37 @@
 const DateTime = luxon.DateTime
 
 class Libro{
-    constructor(isbn13, img, titulo, autor, genero, paginas, update, estado, verMas) {
+    constructor(isbn13, img, title, author, genre, pageNum, update, status, moreInfo) {
         this.isbn13 = isbn13
         this.img = img
-        this.titulo = titulo
-        this.autor = autor
-        this.genero = genero
-        this.paginas = paginas
+        this.title = title
+        this.author = author
+        this.genre = genre
+        this.pageNum = pageNum
         this.update = update
-        this.estado = estado
-        this.verMas = verMas
+        this.status = status
+        this.moreInfo = moreInfo
     }
 }
 
-let arrayLibros = []
+// Assign localStorage saved values if they exist; create new array if not
+let bookArray = []
 if(localStorage.getItem('libros') !== null) {
-    arrayLibros = JSON.parse(localStorage.getItem('libros'))
-} 
+    bookArray = JSON.parse(localStorage.getItem('libros'))
+}
 
+// Adding Book to array. Info fetched using Google Books API.
 let formulario = document.getElementById("idForm")
 
 formulario.addEventListener('submit', (e) => {
     e.preventDefault()
     let datForm = new FormData(formulario)
-    let estadoLibro = formulario.querySelector('input[name=estadoLibro]:checked').value
+    let bookStatus = formulario.querySelector('input[name=bookStatus]:checked').value
     const now = DateTime.now()
     let fechaActual = now.toLocaleString()
-    let tituloLibro = datForm.get("libro").toLowerCase()
-    let tituloLibroQuery = tituloLibro.replace(/ /g, "_")
-    fetch(`https://www.googleapis.com/books/v1/volumes?q=${tituloLibroQuery}&key=AIzaSyCvF_g4SBakVPdyfC_pgwC2dyxzHx761Wk`)
+    let titleLibro = datForm.get("libro").toLowerCase()
+    let titleLibroQuery = titleLibro.replace(/ /g, "_")
+    fetch(`https://www.googleapis.com/books/v1/volumes?q=${titleLibroQuery}&key=AIzaSyCvF_g4SBakVPdyfC_pgwC2dyxzHx761Wk`)
     .then(response => response.json())
     .then(data => {
         let dataLibro = data.items[0].volumeInfo
@@ -39,50 +41,65 @@ formulario.addEventListener('submit', (e) => {
         } catch {
             console.error("NO ENCONTRADO")
         }
-        if (arrayLibros.some(librosArray => librosArray.titulo == dataLibro.title)) {
+        if (bookArray.some(librosArray => librosArray.title == dataLibro.title)) {
             console.log("LIBRO YA EN COLECCIÓN")
             swal("LIBRO YA EN COLECCIÓN", "Agregue otro título por favor", "error");
         } else {
             let isbn13 = dataLibro.industryIdentifiers.find(e => e.type == "ISBN_13")['identifier']
-            let libro = new Libro(isbn13, imgLibro, dataLibro.title, dataLibro.authors, dataLibro.categories, dataLibro.pageCount, fechaActual, estadoLibro, dataLibro.infoLink)
-            arrayLibros.push(libro)
-            localStorage.setItem('libros', JSON.stringify(arrayLibros))  
+            let libro = new Libro(isbn13, imgLibro, dataLibro.title, dataLibro.authors, dataLibro.categories, dataLibro.pageCount, fechaActual, bookStatus, dataLibro.infoLink)
+            bookArray.push(libro)
+            localStorage.setItem('libros', JSON.stringify(bookArray))  
             Toastify({
                 text: "¡Libro añadido exitosamente!",
                 duration: 3000
             }).showToast();
         }
         formulario.reset()
+        showArray(bookArray)
     }
 )})
 
-let botonColeccion = document.getElementById("btnMostrarColeccion")
-let coleccionLibros = document.getElementById("coleccionLibros")
-let barraDeProgreso = document.getElementById("progressBar")
-let sectionFiltros = document.getElementById("seccionFiltros")
+let showCollectionBtn = document.getElementById("btnMostrarColeccion")
+let bookCollection = document.getElementById("coleccionLibros")
+let progressBar = document.getElementById("progressBar")
+let filterSection = document.getElementById("seccionFiltros")
+
+function bookStatusSetter(array) {
+    array.forEach((libro, indice) => {
+        if (libro.status == "por leer") {
+            document.getElementById(`libro${indice}`).classList.add("pendingBook")
+            let bodyLibro = document.getElementById(`bodyLibro${indice}`)
+            bodyLibro.innerHTML = `
+            ${bodyLibro.innerHTML}
+            <button class="btn btn-sm btn-success btnChangeStatus" id="btnChangeStatus${indice}"><i class="fa-solid fa-check"></i>\tCambiar a Leido </button>`
+        } else if (libro.status == "leido") {
+            document.getElementById(`libro${indice}`).classList.add("doneBook")
+        }
+    })
+}
 
 function showArray(array) {
-    coleccionLibros.innerHTML = ' '
-    barraDeProgreso.innerHTML = ' '
-    seccionFiltros.innerHTML = ' '
+    bookCollection.innerHTML = ' '
+    progressBar.innerHTML = ' '
+    filterSection.innerHTML = ' '
     array.forEach((libro, indice) => { 
-        coleccionLibros.innerHTML += `
+        bookCollection.innerHTML += `
         <div class="card h-105 p-0 col-4" id="libro${indice}" style="width: 20rem">
             <div class="card-header d-flex justify-content-between">
-                <span class="badge bg-${libro.estado == "leido" ? "success" : "secondary"}">${libro.estado.toUpperCase()}</span>
+                <span class="badge bg-${libro.status == "leido" ? "success" : "secondary"}">${libro.status.toUpperCase()}</span>
             </div>
-            <div class="card-body" id="bodyLibro">
+            <div class="card-body" id="bodyLibro${indice}">
                 <div class="text-center mb-2">
                     <img src="${libro.img}" onerror="this.src='img/notFound.png'"></img>
                 </div>
-                <h3 class="card-title"><u>${libro.titulo}</u></h5>
-                <h5 class="card-text">Autor: ${libro.autor}</h3>
-                <h5 class="card-text">Género: ${libro.genero}</h3>
-                <p><small>Cantidad de páginas: ${libro.paginas}<br>
+                <h3 class="card-title"><u>${libro.title}</u></h5>
+                <h5 class="card-text">Autor: ${libro.author}</h3>
+                <h5 class="card-text">Género: ${libro.genre}</h3>
+                <p><small>Cantidad de páginas: ${libro.pageNum}<br>
                 ISBN13: ${libro.isbn13}</small></p>
             </div>
             <div class="mx-5 mb-2 text-center gap-3">
-                <a href="${libro.verMas}" target="_blank"><button class="btn btn-sm btn-info"> Ver Más </button></a>
+                <a href="${libro.moreInfo}" target="_blank"><button class="btn btn-sm btn-info"> Ver Más </button></a>
                 <button class="btn btn-sm btn-danger btnEliminar" id="btnRemoveCard${indice}">Eliminar</button>
             </div>
             <div class="card-footer">
@@ -90,37 +107,7 @@ function showArray(array) {
             </div>
         </div>`
 
-        if (libro.estado == "por leer") {
-            document.getElementById(`libro${indice}`).classList.add("pendingBook")
-            let bodyLibro = document.getElementById("bodyLibro")
-            bodyLibro.innerHTML = `
-                ${bodyLibro.innerHTML}
-                <button class="btn btn-sm btn-success btnChangeStatus" id="btnChangeStatus${indice}"><i class="fa-solid fa-check"></i>\tCambiar a Leido </button>
-                `
-            let botonCambiarEstado = document.getElementsByClassName('btnChangeStatus')
-            for (let i=0; i<botonCambiarEstado.length; i++) {
-                botonCambiarEstado[i].addEventListener('click', (e) => {
-                    let indexLibro = e.target.id.replace('btnChangeStatus', '')
-                    swal({
-                        title: "¿Desea cambiar el estado de este libro?",
-                        text: "Este cambio no podrá ser deshecho",
-                        icon: "info",
-                        buttons: true,
-                        dangerMode: false,
-                    })
-                    .then((willDelete) => {
-                        if (willDelete) {
-                            arrayLibros[indexLibro].estado = 'leido'
-                            showArray(arrayLibros)
-                            localStorage.setItem('libros', JSON.stringify(arrayLibros))  
-                        }
-                    })    
-                })
-            }
-        } else if (libro.estado == "leido") {
-            document.getElementById(`libro${indice}`).classList.add("doneBook")
-        }
-
+        libro.status == "por leer" ? document.getElementById(`libro${indice}`).classList.add("pendingBook") : document.getElementById(`libro${indice}`).classList.add("doneBook")
     })
     
     // ELIMINAR LIBRO DE COLECCIÓN (ind.)
@@ -140,20 +127,20 @@ function showArray(array) {
                     swal("¡Libro eliminado!", {
                         icon: "success",
                     })
-                    arrayLibros.splice(indexLibro, 1)
-                    localStorage.setItem('libros', JSON.stringify(arrayLibros))
-                    showArray(arrayLibros)
+                    bookArray.splice(indexLibro, 1)
+                    localStorage.setItem('libros', JSON.stringify(bookArray))
+                    showArray(bookArray)
                 }
             })    
         })
     }
 
     // PORCENTAJE LEIDOS
-    let filtroLeidos = arrayLibros.filter(libro => libro.estado == "leido")
+    let filtroLeidos = bookArray.filter(libro => libro.status == "leido")
     let numeroLeidos = filtroLeidos.length
-    let numeroTotalColeccion = arrayLibros.length
+    let numeroTotalColeccion = bookArray.length
     let porcentajeProgresoLectura = (numeroLeidos/numeroTotalColeccion) * 100
-    barraDeProgreso.innerHTML += `
+    progressBar.innerHTML += `
     <h4>Progreso de lecturas</h4>
     <div class="progress">
         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: ${porcentajeProgresoLectura}%;"></div>
@@ -161,7 +148,7 @@ function showArray(array) {
     `
 
     // BOTONES FILTROS
-    sectionFiltros.innerHTML += `
+    filterSection.innerHTML += `
     <label><strong>Filtros</strong></label>
     <div class="btn-group" role="group" aria-label="Basic example">
         <button type="button" class="btn btn-outline-primary" id="filtroAlfabetico">Orden Alfabético</button>
@@ -173,17 +160,17 @@ function showArray(array) {
     let botonFiltroAlfabetico = document.getElementById("filtroAlfabetico")
     
     function filterByAlphabeticalOrder(array) {
-        let filteredArray = arrayLibros.sort(function(a,b) {
-            if(a.titulo < b.titulo) {return -1;}
-            if(a.titulo > b.titulo) {return 1;} 
+        let filteredArray = array.sort(function(a,b) {
+            if(a.title < b.title) {return -1;}
+            if(a.title > b.title) {return 1;} 
             return 0;
         })
         return filteredArray
     }
 
     botonFiltroAlfabetico.addEventListener('click', () => {
-        coleccionLibros.innerHTML = ' '
-        let arrayFilteredByAlphabeticalOrder = filterByAlphabeticalOrder(arrayLibros) 
+        bookCollection.innerHTML = ' '
+        let arrayFilteredByAlphabeticalOrder = filterByAlphabeticalOrder(bookArray) 
         showArray(arrayFilteredByAlphabeticalOrder)
     })
     
@@ -192,25 +179,21 @@ function showArray(array) {
     
     function filterByStatus(array) {
         let filteredArray = array.sort(function(a,b) {
-        if(a.estado < b.estado) {return 1;}
-        if(a.estado > b.estado) {return -1;} 
+        if(a.status < b.status) {return 1;}
+        if(a.status > b.status) {return -1;} 
         return 0;
         })
         return filteredArray
     }
 
     botonFiltroLectura.addEventListener('click', () => {
-        coleccionLibros.innerHTML = ' '
-        let arrayFilteredByStatus = filterByStatus(arrayLibros)
+        bookCollection.innerHTML = ' '
+        let arrayFilteredByStatus = filterByStatus(bookArray)
         showArray(arrayFilteredByStatus)
     })
 }
 
-// MOSTRAR COLECCIÓN
-botonColeccion.addEventListener ('click', () => {
-    showArray(arrayLibros)
-})
-
+showArray(bookArray)
 
 // ELIMINAR COLECCION
 let botonEliminarColeccion = document.getElementById("btnEliminarColeccion")
@@ -234,5 +217,29 @@ botonEliminarColeccion.addEventListener('click', () => {
     })
 })
 
+let changeStatusBtn = document.getElementsByClassName('btnChangeStatus')
+for (let i=0; i<changeStatusBtn.length; i++) {
+    changeStatusBtn[i].addEventListener('click', (e) => {
+        let indexLibro = e.target.id.replace('btnChangeStatus', '')
+        console.log(indexLibro)
+        swal({
+            title: "¿Desea cambiar el status de este libro?",
+            text: "Este cambio no podrá ser deshecho",
+            icon: "info",
+            buttons: true,
+            dangerMode: false,
+        })
+        .then((willDelete) => {
+            if (willDelete) {
+                bookArray[indexLibro].status = 'leido'
+                showArray(bookArray)
+                localStorage.setItem('libros', JSON.stringify(bookArray))  
+            }
+        })    
+    })
+}
+
+// BUSCADOR
+let bookTitles = bookArray.map(book => book.title)
 
 

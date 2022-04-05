@@ -21,18 +21,18 @@
     </header>
 
     <div class="container-l border border-primary border-3 rounded mx-5 mt-4 p-2" id="divForm">
-        <form id="idForm">
+        <form id="idForm" autocomplete="off">
             <legend> Añadir un libro a tu colección </legend>
             <div class="form-group mb-2">
                 <label class="form-label" for="book">Libro</label>
                 <input type="text" class="form-control" name="libro" id="book" placeholder="E.g. 'Macbeth'">
             </div>
-            <label class="form-label" for="estadoLibro">Estado</label> <br>
+            <label class="form-label" for="bookStatus">Estado</label> <br>
             <div class="btn-group form-group mb-3">
-                <input type="radio" class="btn-check" name="estadoLibro" id="btnPorLeer" value="por leer" checked>
+                <input type="radio" class="btn-check" name="bookStatus" id="btnPorLeer" value="por leer" checked>
                 <label class="btn btn-outline-primary btn-sm" for="btnPorLeer">Por leer</label>
 
-                <input type="radio" class="btn-check" name="estadoLibro" id="btnLeido" value="leido">
+                <input type="radio" class="btn-check" name="bookStatus" id="btnLeido" value="leido">
                 <label class="btn btn-outline-primary btn-sm" for="btnLeido">Leído</label>
             </div>
             <br>
@@ -42,14 +42,18 @@
     </div>
 
     <div class="d-flex justify-content-around">      
-        <button type="checkbox" class="btn btn-info m-3" id="btnMostrarColeccion">Mostrar colección</button>
-        <button class="btn btn btn-danger m-3" id="btnEliminarColeccion">Eliminar colección</button>
-        
+        <button class="btn btn btn-danger m-3" id="btnEliminarColeccion">Eliminar colección</button>   
     </div>
     
     <div class="m-3" id="progressBar"></div>
 
-    <div class="m-3" id="seccionFiltros"></div>
+    <div class="m-3" id="seccionFiltros">
+        <label><strong>Filtros</strong></label>
+        <div class="btn-group" role="group" aria-label="Basic example">
+            <button type="button" class="btn btn-outline-primary" id="filtroAlfabetico">Orden Alfabético</button>
+            <button type="button" class="btn btn-outline-primary" id="filtroLectura">Estado de lectura</button>
+        </div>
+    </div>
     
     <div id="coleccionLibros" class="row row-cols-md-4 g-4 gap-3 mx-3 mb-3 justify-content-evenly">
     </div>
