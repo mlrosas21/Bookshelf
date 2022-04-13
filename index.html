@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <title>Bookshelf - tu biblioteca</title>
+    <link rel="icon" type="image/x-icon" href="./img/favicon.png">
 </head>
 
 <body>
@@ -47,12 +48,18 @@
     
     <div class="m-3" id="progressBar"></div>
 
-    <div class="m-3" id="seccionFiltros">
-        <label><strong>Filtros</strong></label>
-        <div class="btn-group" role="group" aria-label="Basic example">
-            <button type="button" class="btn btn-outline-primary" id="filtroAlfabetico">Orden Alfabético</button>
-            <button type="button" class="btn btn-outline-primary" id="filtroLectura">Estado de lectura</button>
+    <div class="m-3 row" id="seccionFiltros">
+        <div class="col">
+            <label><strong>Filtros</strong></label>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary" id="filtroAlfabetico">Orden Alfabético</button>
+                <button type="button" class="btn btn-outline-primary" id="filtroLectura">Estado de lectura</button>
+            </div>
         </div>
+        <form class="col d-flex input-group" id="searchForm">
+            <input type="text" class="form-control" placeholder="Ingrese una palabra..." name="searchInput">
+            <button class="btn btn-outline-secondary" type="submit" id="searchBtn"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </form>
     </div>
     
     <div id="coleccionLibros" class="row row-cols-md-4 g-4 gap-3 mx-3 mb-3 justify-content-evenly">
