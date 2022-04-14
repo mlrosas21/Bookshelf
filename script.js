@@ -15,11 +15,19 @@ class Libro{
     }
 }
 
+const showCollectionBtn = document.getElementById("btnMostrarColeccion")
+const bookCollection = document.getElementById("coleccionLibros")
+const progressBar = document.getElementById("progressBar")
+const filterSection = document.getElementById("seccionFiltros")
+
 // Assign localStorage saved values if they exist; create new array if not
 let bookArray = []
 if(localStorage.getItem('libros') !== null) {
     bookArray = JSON.parse(localStorage.getItem('libros'))
 }
+
+showArray(bookArray)
+addRemoveBtns()
 
 // Adding Book to array. Info fetched using Google Books API.
 let formulario = document.getElementById("idForm")
@@ -60,104 +68,11 @@ formulario.addEventListener('submit', (e) => {
     }
 )})
 
-let showCollectionBtn = document.getElementById("btnMostrarColeccion")
-let bookCollection = document.getElementById("coleccionLibros")
-let progressBar = document.getElementById("progressBar")
-let filterSection = document.getElementById("seccionFiltros")
-
-function bookStatusSetter(array) {
-    array.forEach((libro, indice) => {
-        if (libro.status == "por leer") {
-            document.getElementById(`libro${indice}`).classList.add("pendingBook")
-            let bodyLibro = document.getElementById(`bodyLibro${indice}`)
-            bodyLibro.innerHTML = `
-            ${bodyLibro.innerHTML}
-            <button class="btn btn-sm btn-success btnChangeStatus" value="${indice}"><i class="fa-solid fa-check"></i>\tCambiar a Leido </button>`
-        } else if (libro.status == "leido") {
-            document.getElementById(`libro${indice}`).classList.add("doneBook")
-        }
-    })
-}
-
-function renderArray(array) {
-    array.forEach((libro, indice) => { 
-        bookCollection.innerHTML += `
-        <div class="card h-105 p-0 col-4" id="libro${indice}" style="width: 20rem">
-            <div class="card-header d-flex justify-content-between">
-                <span class="badge bg-${libro.status == "leido" ? "success" : "secondary"}">${libro.status.toUpperCase()}</span>
-            </div>
-            <div class="card-body" id="bodyLibro${indice}">
-                <div class="text-center mb-2">
-                    <img src="${libro.img}" onerror="this.src='img/notFound.png'"></img>
-                </div>
-                <h3 class="card-title"><u>${libro.title}</u></h5>
-                <h5 class="card-text">Autor: ${libro.author}</h3>
-                <h5 class="card-text">Género: ${libro.genre}</h3>
-                <p><small>Cantidad de páginas: ${libro.pageNum}<br>
-                ISBN13: ${libro.isbn13}</small></p>
-            </div>
-            <div class="mx-5 mb-2 text-center gap-3" id="cardBtns">
-                <a href="${libro.moreInfo}" target="_blank"><button class="btn btn-sm btn-info"> Ver Más </button></a>
-                <button class="btn btn-sm btn-danger btnEliminar" value="${libro.titleString}">Eliminar</button>
-            </div>
-            <div class="card-footer">
-                <small class="text-muted">Añadido el ${libro.update}</small>
-            </div>
-        </div>`
-
-        libro.status == "por leer" ? document.getElementById(`libro${indice}`).classList.add("pendingBook") : document.getElementById(`libro${indice}`).classList.add("doneBook")  
-    })
-}
-
 function showArray(array) {
     bookCollection.innerHTML = ' '
     progressBar.innerHTML = ' '
-    renderArray(array)
-    let changeStatusBtn = document.getElementsByClassName('btnChangeStatus')
-    for (let i=0; i<changeStatusBtn.length; i++) {
-        changeStatusBtn[i].addEventListener('click', (e) => {
-            let indexLibro = e.target.id.replace('btnChangeStatus', '')
-            console.log(indexLibro)
-            swal({
-                title: "¿Desea cambiar el status de este libro?",
-                text: "Este cambio no podrá ser deshecho",
-                icon: "info",
-                buttons: true,
-                dangerMode: false,
-            })
-            .then((willDelete) => {
-                if (willDelete) {
-                    bookArray[indexLibro].status = 'leido'
-                    showArray(bookArray)
-                    localStorage.setItem('libros', JSON.stringify(bookArray))  
-                }
-            })    
-        })
-    }
-    
-    // ELIMINAR LIBRO DE COLECCIÓN (ind.)
-    let botonesEliminar = document.getElementsByClassName('btnEliminar')
-    for (let i=0; i<botonesEliminar.length; i++) {
-        botonesEliminar[i].addEventListener('click', (e) => {
-            let index = bookArray.findIndex(book => book.titleString == e.target.value)
-            swal({
-                title: "¿Estás seguro que desea eliminar este libro?",
-                icon: "warning",
-                buttons: true,
-                dangerMode: true,
-            })
-            .then((willDelete) => {
-                if (willDelete) {
-                    swal("¡Libro eliminado!", {
-                        icon: "success",
-                    })
-                    bookArray.splice(index, 1)
-                    localStorage.setItem('libros', JSON.stringify(bookArray))
-                    showArray(bookArray)
-                }
-            })   
-        })
-    }
+    renderArray(array) 
+    addChangeStatusFunc()
 
     // PORCENTAJE LEIDOS
     let filtroLeidos = bookArray.filter(libro => libro.status == "leido")
@@ -171,17 +86,7 @@ function showArray(array) {
     </div>
     `
 
-    // BOTONES FILTROS
-    /*
-    filterSection.innerHTML += `
-    <label><strong>Filtros</strong></label>
-    <div class="btn-group" role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-outline-primary" id="filtroAlfabetico">Orden Alfabético</button>
-        <button type="button" class="btn btn-outline-primary" id="filtroLectura">Estado de lectura</button>
-    </div>
-    `
-    */
-        // FILTRAR COLECCIÓN 
+    // FILTRAR COLECCIÓN 
     // A a Z
     let botonFiltroAlfabetico = document.getElementById("filtroAlfabetico")
     
@@ -219,7 +124,7 @@ function showArray(array) {
     })
 }
 
-showArray(bookArray)
+
 
 // ELIMINAR COLECCION
 let botonEliminarColeccion = document.getElementById("btnEliminarColeccion")
@@ -243,29 +148,7 @@ botonEliminarColeccion.addEventListener('click', () => {
     })
 })
 
-let changeStatusBtn = document.getElementsByClassName('btnChangeStatus')
-for (let i=0; i<changeStatusBtn.length; i++) {
-    changeStatusBtn[i].addEventListener('click', (e) => {
-        let indexLibro = e.target.id.replace('btnChangeStatus', '')
-        console.log(indexLibro)
-        swal({
-            title: "¿Desea cambiar el status de este libro?",
-            text: "Este cambio no podrá ser deshecho",
-            icon: "info",
-            buttons: true,
-            dangerMode: false,
-        })
-        .then((willDelete) => {
-            if (willDelete) {
-                bookArray[indexLibro].status = 'leido'
-                showArray(bookArray)
-                localStorage.setItem('libros', JSON.stringify(bookArray))  
-            }
-        })    
-    })
-}
-
-// BUSCADOR
+// Search bar
 let searchForm = document.getElementById('searchForm')
 
 searchForm.addEventListener('submit', (e) => {
@@ -276,4 +159,91 @@ searchForm.addEventListener('submit', (e) => {
     showArray(foundArray)
 })
 
+// Rendering array in HTML
+function renderArray(array) {
+    array.forEach((libro, indice) => { 
+        bookCollection.innerHTML += `
+        <div class="card h-105 p-0 col-4" id="libro${indice}" style="width: 20rem">
+            <div class="card-header d-flex justify-content-between align-items-center" id="cardHeader${indice}">
+                <span class="badge bg-${libro.status == "leido" ? "success" : "secondary"}">${libro.status.toUpperCase()}</span>
+            </div>
+            <div class="card-body" id="bodyLibro${indice}">
+                <div class="text-center mb-2">
+                    <img src="${libro.img}" onerror="this.src='img/notFound.png'"></img>
+                </div>
+                <h3 class="card-title"><u>${libro.title}</u></h5>
+                <h5 class="card-text">Autor: ${libro.author}</h3>
+                <h5 class="card-text">Género: ${libro.genre}</h3>
+                <p><small>Cantidad de páginas: ${libro.pageNum}<br>
+                ISBN13: ${libro.isbn13}</small></p>
+            </div>
+            <div class="mx-5 mb-2 text-center gap-3" id="cardBtns">
+                <a href="${libro.moreInfo}" target="_blank"><button class="btn btn-sm btn-info"> Ver Más </button></a>
+                <button class="btn btn-sm btn-danger btnEliminar" value="${libro.titleString}">Eliminar</button>
+            </div>
+            <div class="card-footer">
+                <small class="text-muted">Añadido el ${libro.update}</small>
+            </div>
+        </div>`
+
+        if(libro.status == "por leer") {
+            document.getElementById(`libro${indice}`).classList.add("pendingBook")
+            let cardHeader = document.getElementById(`cardHeader${indice}`)
+            cardHeader.innerHTML += `<span class="badge bg-success changeStatus" data-value="${libro.titleString}"><i class="fa-solid fa-check"></i> COMPLETAR </span>`
+
+        } else{
+            document.getElementById(`libro${indice}`).classList.add("doneBook")
+        }
+    })
+}
+
+// Funcionality of change status buttons
+function addChangeStatusFunc(){
+    let changeStatusSpans = document.getElementsByClassName('changeStatus')
+    for(let i=0; i<changeStatusSpans.length; i++){
+        changeStatusSpans[i].addEventListener('click', (e) =>{
+            swal({
+                title: "¿Desea cambiar el status de este libro?",
+                text: "Este cambio no podrá ser deshecho",
+                icon: "info",
+                buttons: true,
+                dangerMode: false,
+            })
+            .then((willDelete) => {
+                if (willDelete) {
+                    let index = bookArray.findIndex(book => book.titleString == e.target.dataset.value)
+                    bookArray[index].status = 'leido'
+                    showArray(bookArray)
+                    localStorage.setItem('libros', JSON.stringify(bookArray))  
+                }
+            })
+        })
+    }
+}
+
+// Remove single book from collection
+function addRemoveBtns() {
+    let botonesEliminar = document.getElementsByClassName('btnEliminar')
+    for (let i=0; i<botonesEliminar.length; i++) {
+        botonesEliminar[i].addEventListener('click', (e) => {
+            let index = bookArray.findIndex(book => book.titleString == e.target.value)
+            swal({
+                title: "¿Estás seguro que desea eliminar este libro?",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            })
+            .then((willDelete) => {
+                if (willDelete) {
+                    swal("¡Libro eliminado!", {
+                        icon: "success",
+                    })
+                    bookArray.splice(index, 1)
+                    localStorage.setItem('libros', JSON.stringify(bookArray))
+                    showArray(bookArray)
+                }
+            })   
+        })
+    }
+}
 
