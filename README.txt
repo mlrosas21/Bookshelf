@@ -4,4 +4,6 @@ Creating website where you can save pending and completed readings to make their
 
 Made with VanillaJS & using Bootstrap as CSS Framework
 
-Libraries: SweetAlert, Luxon
+API: Google Books API
+
+Libraries: SweetAlert, Luxon & Toastify
