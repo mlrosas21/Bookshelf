@@ -1,7 +1,7 @@
 const DateTime = luxon.DateTime
 
 class Libro{
-    constructor(isbn13, img, title, author, genre, pageNum, update, status, moreInfo) {
+    constructor(isbn13, img, title, author, genre, pageNum, update, status, moreInfo, titleString) {
         this.isbn13 = isbn13
         this.img = img
         this.title = title
@@ -11,6 +11,7 @@ class Libro{
         this.update = update
         this.status = status
         this.moreInfo = moreInfo
+        this.titleString = titleString
     }
 }
 
@@ -46,7 +47,7 @@ formulario.addEventListener('submit', (e) => {
             swal("LIBRO YA EN COLECCIÓN", "Agregue otro título por favor", "error");
         } else {
             let isbn13 = dataLibro.industryIdentifiers.find(e => e.type == "ISBN_13")['identifier']
-            let libro = new Libro(isbn13, imgLibro, dataLibro.title, dataLibro.authors, dataLibro.categories, dataLibro.pageCount, fechaActual, bookStatus, dataLibro.infoLink)
+            let libro = new Libro(isbn13, imgLibro, dataLibro.title, dataLibro.authors, dataLibro.categories, dataLibro.pageCount, fechaActual, bookStatus, dataLibro.infoLink, dataLibro.title.replace(/\s+/g, ''))
             bookArray.push(libro)
             localStorage.setItem('libros', JSON.stringify(bookArray))  
             Toastify({
@@ -97,7 +98,7 @@ function renderArray(array) {
             </div>
             <div class="mx-5 mb-2 text-center gap-3" id="cardBtns">
                 <a href="${libro.moreInfo}" target="_blank"><button class="btn btn-sm btn-info"> Ver Más </button></a>
-                <button class="btn btn-sm btn-danger btnEliminar" value="${indice}">Eliminar</button>
+                <button class="btn btn-sm btn-danger btnEliminar" value="${libro.titleString}">Eliminar</button>
             </div>
             <div class="card-footer">
                 <small class="text-muted">Añadido el ${libro.update}</small>
@@ -138,8 +139,7 @@ function showArray(array) {
     let botonesEliminar = document.getElementsByClassName('btnEliminar')
     for (let i=0; i<botonesEliminar.length; i++) {
         botonesEliminar[i].addEventListener('click', (e) => {
-            console.log(e.target.value)
-            let indexLibro = e.target.value
+            let index = bookArray.findIndex(book => book.titleString == e.target.value)
             swal({
                 title: "¿Estás seguro que desea eliminar este libro?",
                 icon: "warning",
@@ -151,7 +151,7 @@ function showArray(array) {
                     swal("¡Libro eliminado!", {
                         icon: "success",
                     })
-                    array.splice(indexLibro, 1)
+                    bookArray.splice(index, 1)
                     localStorage.setItem('libros', JSON.stringify(bookArray))
                     showArray(bookArray)
                 }
